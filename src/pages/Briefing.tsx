@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
-import EarthAnimation from "@/components/EarthAnimation";
+import { Ear, Earth, Sparkles } from "lucide-react";
 
 const Briefing = () => {
   const navigate = useNavigate();
@@ -39,7 +38,7 @@ const Briefing = () => {
 
         {/* Earth Animation */}
         <div className="flex justify-center animate-float">
-          <EarthAnimation className="drop-shadow-2xl scale-90" />
+          <Earth />
         </div>
 
         {/* CTA Button */}
