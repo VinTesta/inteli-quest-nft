@@ -1,6 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { getAccountData } from "@/lib/api";
 import { Target, Users, Wallet } from "lucide-react";
+import { useEffect, useState } from "react";
 
 type Rarity = "comum" | "rara" | "épica" | "lendária";
 
@@ -49,14 +51,40 @@ const getRarityCount = (rarity: Rarity) => {
 };
 
 export function Profile() {
+  const [email, setEmail] = useState("");
+  const [publicKey, setPublicKey] = useState("");
+
+  useEffect(() => {
+    const fetchAccountData = async () => {
+      try {
+        const data = await getAccountData();
+        const userData = data.find((item: any) => item.SortKey === "METADATA");
+        const walletData = data.find((item: any) => item.SortKey === "WALLET");
+
+        if (userData) {
+          setEmail(userData.email);
+        }
+        if (walletData) {
+          setPublicKey(walletData.publicKey);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchAccountData();
+  }, []);
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="glass-panel rounded-2xl p-6 text-center">
         <div className="bg-primary/20 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
           <Users className="h-10 w-10 text-primary" />
         </div>
-        <h2 className="text-2xl font-bold">Agente #{Math.floor(Math.random() * 9999)}</h2>
-        <p className="text-sm text-foreground/70 mt-1">Missão: Transformar o Mundo</p>
+        <h2 className="text-sm font-bold">{email}</h2>
+        <p className="text-xs text-foreground/70 mt-1">
+          {publicKey ? `${publicKey.slice(0, 6)}...${publicKey.slice(-6)}` : ""}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -69,15 +97,14 @@ export function Profile() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-foreground/70">NFTs Coletados</span>
-                <span className="font-bold">{collectedNFTs.length}</span>
+                <span className="font-bold">{collectedNFTs.length}/20</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-foreground/70">Total de NFTs</span>
-                <span className="font-bold">{clubs.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-foreground/70">Taxa de Conclusão</span>
-                <span className="font-bold">{Math.round(progress)}%</span>
+              <div className="flex justify-between flex-col">
+                <div className="flex justify-between mb-1">
+                  <span className="text-foreground/70">Taxa de Conclusão</span>
+                  <span className="font-bold">{Math.round(progress)}%</span>
+                </div>
+                <Progress value={23} className="h-2" />
               </div>
             </div>
           </CardContent>
@@ -97,10 +124,6 @@ export function Profile() {
               <div className="flex justify-between">
                 <span className="text-foreground/70">Clubes Visitados</span>
                 <span className="font-bold">{collectedNFTs.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-foreground/70">Pontos de Impacto</span>
-                <span className="font-bold">{collectedNFTs.length * 100}</span>
               </div>
             </div>
           </CardContent>

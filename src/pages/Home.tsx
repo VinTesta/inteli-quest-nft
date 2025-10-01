@@ -110,7 +110,6 @@ export function HomePage() {
                 </div>
             ) : currentMission.tasks.map((task) => (
                 <div>
-                  
                   <div className="flex items-center justify-between text-sm">
                     <span className={`font-medium ${task.completed && "line-through text-emerald-700"}`}>{task.description}</span>
                     <span className={`font-bold ${task.completed && 'text-green-400'}`}>{task.completed ? 1 : 0}/1</span>

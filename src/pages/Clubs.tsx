@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, BrainCircuit, Code, Disc, Music } from "lucide-react";
+import { Progress } from "@radix-ui/react-progress";
 
 type Rarity = "comum" | "rara" | "épica" | "lendária";
 
@@ -66,14 +67,14 @@ export function Clubs() {
                         <h3 className="font-bold text-lg">{club.name}</h3>
                         <p className="text-sm text-foreground/70">{club.description}</p>
                       </div>
-                      {isCollected && (
-                        <Badge className="bg-secondary text-foreground">NFT Coletado</Badge>
-                      )}
                     </div>
-                    <div className="flex gap-4 text-sm text-foreground/70 mt-3">
-                      <span>👥 {club.members} membros</span>
-                      <span>📅 Fundado em {club.founded}</span>
-                      <Badge className={rarityColors[club.rarity]}>{club.rarity}</Badge>
+                    <div className="flex flex-col gap-4 text-sm text-foreground/70 mt-3">
+                      <div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className={`font-medium ${isCollected && "line-through text-emerald-700"}`}>Visitado</span>
+                          <span className={`font-bold ${isCollected && 'text-green-400'}`}>{isCollected ? 1 : 0}/1</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

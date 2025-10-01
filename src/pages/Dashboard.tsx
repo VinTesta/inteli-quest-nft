@@ -29,7 +29,7 @@ const Dashboard = () => {
         <div className="glass-strong rounded-b-3xl p-6 space-y-4 animate-fade-in">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">Agente Inteli</h1>
+              <h1 className="text-3xl font-bold">Inteli Day</h1>
               <p className="text-sm text-foreground/70 mt-1">
                 Missão: Mudar o mundo com tecnologia
               </p>

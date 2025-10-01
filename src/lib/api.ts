@@ -25,3 +25,11 @@ export const api = async (url: string, options: RequestInit = {}) => {
 
   return response;
 };
+
+export const getAccountData = async () => {
+  const response = await api("/account");
+  if (!response.ok) {
+    throw new Error("Failed to fetch account data");
+  }
+  return response.json();
+};
