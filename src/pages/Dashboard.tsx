@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Target, Users, Trophy, Wallet, Sparkles, Check, Lock, Home } from "lucide-react";
 import { HomePage } from "./Home";
+import { Collection } from "./Collection";
+import { Clubs } from "./Clubs";
+import { Profile } from "./Profile";
 
 const Dashboard = () => {
   const [collectedNFTs, setCollectedNFTs] = useState<number[]>([]);
@@ -46,17 +49,17 @@ const Dashboard = () => {
 
           {/* NFTs Tab */}
           <TabsContent value="nfts" className="mt-0 space-y-6">
-            Coleção de NFTs
+            <Collection/>
           </TabsContent>
 
           {/* Clubes Tab */}
           <TabsContent value="clubes" className="mt-0 space-y-6">
-            Clubes Estudantis
+            <Clubs/>
           </TabsContent>
 
           {/* Perfil Tab */}
           <TabsContent value="perfil" className="mt-0 space-y-6">
-            Perfil do Aluno
+            <Profile/>
           </TabsContent>
         </div>
 

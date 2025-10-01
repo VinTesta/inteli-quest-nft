@@ -1,17 +1,23 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Target, Users, Trophy, Wallet, Sparkles, Check, Lock, Clock } from "lucide-react";
+import { Target, Check, Lock, Clock } from "lucide-react";
+import { useEffect, useState } from "react";
+
 type Rarity = "comum" | "rara" | "épica" | "lendária";
+
+interface Task {
+  id: number;
+  description: string;
+  completed: boolean;
+}
 
 interface Mission {
   id: number;
   title: string;
   story: string;
-  status: string;
+  status: "current" | "upcoming" | "completed";
   description: string;
-  tasks: { id: number, description: string, completed: boolean }[];
+  tasks: Task[];
 }
 
 const missionData: Mission[] = [
@@ -33,7 +39,10 @@ const missionData: Mission[] = [
     status: "upcoming",
     story: "",
     description: "",
-    tasks: []
+    tasks: [
+      { id: 1, description: "Capture a NFT do Inteli Ultimate Frisbee", completed: false },
+      { id: 2, description: "Capture a NFT da Bateria", completed: false },
+    ]
   },
   {
     id: 3,
@@ -57,47 +66,74 @@ const missionData: Mission[] = [
 ];
 
 export function HomePage() {
-  const currentMission = missionData.find(m => m.status === "current");
+  const [currMissionDetails, setCurrMissionDetails] = useState<boolean>(false);
+
+  let currentMission = missionData.find(m => m.status === "current");
+
+  const completedTasks = currentMission?.tasks.filter(t => t.completed).length || 0;
+  const totalTasks = currentMission?.tasks.length || 0;
+  const currentProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+  const allTasks = missionData.flatMap(m => m.tasks);
+  const totalCompletedTasks = allTasks.filter(t => t.completed).length;
+  const totalOverallTasks = allTasks.length;
+  const totalProgress = totalOverallTasks > 0 ? (totalCompletedTasks / totalOverallTasks) * 100 : 0;
 
   return (
-    <div className="container mx-auto p-4 space-y-6">     
-      <h2 className="text-xl font-bold">Progresso Atual</h2> 
-      <Card
-        key={currentMission.id}
-        className={`border-0 transition-all hover:scale-105 animate-fade-in`}
-        style={{ animationDelay: `${0.1 * 0.05}s` }}
-      >
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`p-3 rounded-xl`}>
-                <Clock className={`h-6 w-6`} />
+    <div className="container mx-auto p-4 space-y-6">
+      <h2 className="text-xl font-bold">Progresso Atual</h2>
+      {currentMission && (
+        <Card
+          key={currentMission.id}
+          className={`border-0 transition-all animate-fade-in`}
+          onClick={() => setCurrMissionDetails(!currMissionDetails)}
+        >
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`p-3 rounded-xl`}>
+                  <Clock className={`h-6 w-6`} />
+                </div>
+                <CardTitle className={`text-lg`}>{currentMission.title}</CardTitle>
               </div>
-              <CardTitle className={`text-lg`}>{currentMission.title}</CardTitle>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">Progresso</span>
-              <span className="font-bold">{5}/{10}</span>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+            {currMissionDetails ? (
+                <div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium">Progresso</span>
+                    <span className="font-bold">{completedTasks}/{totalTasks}</span>
+                  </div>
+                  <Progress value={currentProgress} className="h-3" />
+                </div>
+            ) : currentMission.tasks.map((task) => (
+                <div>
+                  
+                  <div className="flex items-center justify-between text-sm">
+                    <span className={`font-medium ${task.completed && "line-through text-emerald-700"}`}>{task.description}</span>
+                    <span className={`font-bold ${task.completed && 'text-green-400'}`}>{task.completed ? 1 : 0}/1</span>
+                  </div>
+                  <Progress value={0} className={`h-3 ${task.completed && 'bg-green-400'}`} />
+                </div>
+              )
+            )}
             </div>
-            <Progress value={50} className="h-3" />
-          </div>
-        </CardContent>
-      </Card>
+
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {missionData.map((mission, index) => {
-          const isCollected = true;
-          const completed = mission.tasks.every(task => task.completed);
+        {missionData.slice(1).map((mission, index) => {
+          const completed = mission.status === 'completed';
           const Icon = completed ? Check : Lock;
 
           return (
             <Card
               key={mission.id}
-              className={`${completed || completed == true ? "bg-green-300" : "bg-gray-300"} border-0 transition-all hover:scale-105 animate-fade-in`}
+              className={`${completed ? "bg-green-300" : "bg-gray-300"} border-0 transition-all animate-fade-in`}
               style={{ animationDelay: `${0.1 + index * 0.05}s` }}
             >
               <CardHeader>
@@ -106,7 +142,7 @@ export function HomePage() {
                     <div className={`p-3 rounded-xl`}>
                       <Icon className={`h-6 w-6`} />
                     </div>
-                    <CardTitle className={`text-lg ${completed || completed == true ? "line-through text-emerald-700" : "text-gray-500"}`}>{mission.title}</CardTitle>
+                    <CardTitle className={`text-lg ${completed ? "line-through text-emerald-700" : "text-gray-500"}`}>{mission.title}</CardTitle>
                   </div>
                 </div>
               </CardHeader>
@@ -115,7 +151,7 @@ export function HomePage() {
         })}
       </div>
 
-      <hr></hr>
+      <hr />
       <h2 className="text-xl font-bold">Progresso Total</h2>
 
       <div className="glass-panel rounded-2xl p-6">
@@ -130,9 +166,9 @@ export function HomePage() {
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="font-medium">Progresso</span>
-            <span className="font-bold">{5}/{10}</span>
+            <span className="font-bold">{totalCompletedTasks}/{totalOverallTasks}</span>
           </div>
-          <Progress value={50} className="h-3" />
+          <Progress value={totalProgress} className="h-3" />
         </div>
       </div>
     </div>
