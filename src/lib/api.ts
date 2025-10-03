@@ -33,3 +33,19 @@ export const getAccountData = async () => {
   }
   return response.json();
 };
+
+export const getNfts = async () => {
+  const response = await api("/nft");
+  if (!response.ok) {
+    throw new Error("Failed to fetch nfts");
+  }
+  return response.json();
+};
+
+export const getClubs = async () => {
+  const response = await api("/clubs");
+  if (!response.ok) {
+    throw new Error("Failed to fetch clubs");
+  }
+  return response.json();
+};

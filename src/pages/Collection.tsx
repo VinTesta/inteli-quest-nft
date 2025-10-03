@@ -1,41 +1,64 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Users, BrainCircuit, Code, Disc, Music } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getNfts } from "@/lib/api";
 
-type Rarity = "comum" | "rara" | "épica" | "lendária";
+type Rarity = "common" | "rare" | "epic" | "legendary";
 
-interface Club {
-  id: number;
-  name: string;
+interface Nft {
+  PK: string;
+  SK: string;
+  GSI2PK: string;
+  GSI2SK: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  missionId: string;
   rarity: Rarity;
-  icon: React.ElementType;
-  bgColor: string;
-  color: string;
+  symbol: string;
+  createdAt: string;
+  metadataUri: string;
+  collected: boolean;
 }
 
-const clubs: Club[] = [
-  { id: 1, name: "Coletivo Feminino", rarity: "comum", icon: Users, bgColor: "bg-pink-200", color: "text-pink-600" },
-  { id: 2, name: "Liga de IA", rarity: "rara", icon: BrainCircuit, bgColor: "bg-blue-200", color: "text-blue-600" },
-  { id: 3, name: "Inteli Blockchain", rarity: "épica", icon: Code, bgColor: "bg-purple-200", color: "text-purple-600" },
-  { id: 4, name: "Inteli Ultimate Frisbee", rarity: "comum", icon: Disc, bgColor: "bg-green-200", color: "text-green-600" },
-  { id: 5, name: "Bateria", rarity: "rara", icon: Music, bgColor: "bg-yellow-200", color: "text-yellow-600" },
-  { id: 6, name: "Clube de Música", rarity: "lendária", icon: Music, bgColor: "bg-red-200", color: "text-red-600" },
-];
-
-const collectedNFTs: number[] = [1, 4, 5];
-
 const rarityColors: Record<Rarity, string> = {
-  comum: "bg-muted text-foreground",
-  rara: "bg-primary/20 text-primary",
-  épica: "bg-accent/20 text-accent",
-  lendária: "bg-secondary/20 text-secondary",
-};
-
-const getRarityCount = (rarity: Rarity) => {
-  return clubs.filter(c => c.rarity === rarity && collectedNFTs.includes(c.id)).length;
+  common: "bg-gray-300 text-foreground",
+  rare: "bg-blue-400 text-blue-900",
+  epic: "bg-indigo-400 text-indigo-900",
+  legendary: "bg-amber-400 text-amber-900",
 };
 
 export function Collection() {
+  const [nfts, setNfts] = useState<Nft[]>([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchNfts = async () => {
+      try {
+        let data = await getNfts();
+        data = data.map((nft: Nft) => ({
+          ...nft,
+          collected: true
+        }));
+        setNfts(data);
+      } catch (error) {
+        console.error("Failed to fetch nfts:", error);
+      }
+    };
+
+    fetchNfts();
+  }, []);
+
+  const getRarityCount = (rarity: Rarity) => {
+    return nfts.filter(n => n.rarity === rarity).length;
+  };
+
+  const getCollectedRarityCount = (rarity: Rarity) => {
+    return nfts.filter(n => n.rarity === rarity && n.collected).length;
+  };
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="glass-panel rounded-2xl p-6">
@@ -50,7 +73,7 @@ export function Collection() {
                 {rarity}
               </div>
               <div className="text-2xl font-bold">
-                {getRarityCount(rarity as Rarity)}/{clubs.filter(c => c.rarity === rarity).length}
+                {getCollectedRarityCount(rarity as Rarity)}/{getRarityCount(rarity as Rarity)}
               </div>
             </div>
           ))}
@@ -58,27 +81,25 @@ export function Collection() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {clubs.map((club) => {
-          const isCollected = collectedNFTs.includes(club.id);
-          const Icon = club.icon;
-
+        {nfts.map((nft) => {
           return (
             <Card
-              key={club.id}
-              className={`glass-panel border-0 transition-all ${isCollected ? 'hover:scale-105' : 'opacity-60'}`}
+              key={nft.PK}
+              className={`glass-panel border-0 transition-all ${nft.collected ? 'hover:scale-105' : 'opacity-60'}`}
+              onClick={() => nft.collected && navigate(`/nfts/${nft.PK}`)}
             >
               <CardContent className="p-6 text-center space-y-3">
-                <div className={`${club.bgColor} p-4 rounded-xl mx-auto w-fit`}>
-                  {isCollected ? (
-                    <Icon className={`h-8 w-8 ${club.color}`} />
+                <div className={'bg-gray-200 p-4 rounded-xl mx-auto w-fit'}>
+                  {nft.collected ? (
+                    <img src={nft.imageUrl} alt={nft.title} className="h-8 w-8" />
                   ) : (
                     <div className="h-8 w-8 flex items-center justify-center text-2xl">?</div>
                   )}
                 </div>
                 <div>
-                  <p className="font-bold">{isCollected ? club.name : "???"}</p>
-                  <Badge className={`${rarityColors[club.rarity]} mt-2`}>
-                    {isCollected ? club.rarity : "???"}
+                  <p className="font-bold">{nft.collected ? nft.title : "???"}</p>
+                  <Badge className={`${rarityColors[nft.rarity]} mt-2`}>
+                    {nft.collected ? nft.rarity : "???"}
                   </Badge>
                 </div>
               </CardContent>

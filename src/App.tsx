@@ -8,6 +8,8 @@ import Welcome from "./pages/Welcome";
 import Briefing from "./pages/Briefing";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import NftDetail from "./pages/NftDetail";
+import ClubDetail from "./pages/ClubDetail";
 import { Login } from "./pages/Login";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -25,6 +27,8 @@ const App = () => (
             <Route path="/briefing" element={<Briefing />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/login" element={<Login />} />
+            <Route path="/nfts/:id" element={<NftDetail />} />
+            <Route path="/clubs/:id" element={<ClubDetail />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
