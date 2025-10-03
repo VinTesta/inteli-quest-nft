@@ -2,89 +2,79 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Target, Check, Lock, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
+import { getMissions } from "@/lib/api";
 
-type Rarity = "comum" | "rara" | "épica" | "lendária";
-
-interface Task {
-  id: number;
+interface Nft {
+  GSI2PK: string;
+  imageUrl: string;
+  symbol: string;
+  rarity: string;
+  metadataUri: string;
+  createdAt: string;
+  SK: string;
+  missionId: string;
   description: string;
-  completed: boolean;
+  PK: string;
+  GSI2SK: string;
+  title: string;
 }
 
 interface Mission {
-  id: number;
-  title: string;
-  story: string;
-  status: "current" | "upcoming" | "completed";
+  createdAt: string;
+  SK: string;
+  missionId: string;
+  order: number;
   description: string;
-  tasks: Task[];
+  PK: string;
+  title: string;
+  nfts: Nft[];
 }
 
-const missionData: Mission[] = [
-  {
-    id: 1,
-    title: "Recrutando os Primeiros Aliados",
-    story: "Você me parece bom nisso, que tal se você provar seu valor?",
-    description: "Vá atrás do coletivo Grace Hopper, da Liga de IA e do Inteli Blockchain, talvez eles te ajudem.",
-    status: "current",
-    tasks: [
-      { id: 1, description: "Capture a NFT do Coletivo Feminino", completed: true },
-      { id: 2, description: "Capture a NFT da Liga de IA", completed: false },
-      { id: 3, description: "Capture a NFT do Inteli Blockchain", completed: false },
-    ],
-  },
-  {
-    id: 2,
-    title: "Expansão Tecnológica",
-    status: "upcoming",
-    story: "",
-    description: "",
-    tasks: [
-      { id: 1, description: "Capture a NFT do Inteli Ultimate Frisbee", completed: false },
-      { id: 2, description: "Capture a NFT da Bateria", completed: false },
-    ]
-  },
-  {
-    id: 3,
-    title: "Dominando o Metaverso",
-    status: "upcoming",
-    story: "",
-    description: "",
-    tasks: []
-  },
-  {
-    id: 4,
-    title: "A Primeira Missão",
-    description: "Colete os NFTs dos clubes fundadores.",
-    status: "completed",
-    tasks: [
-      { id: 1, description: "Capture a NFT do Inteli Ultimate Frisbee", completed: true },
-      { id: 2, description: "Capture a NFT da Bateria", completed: true },
-    ],
-    story: ""
-  },
-];
+interface ApiResponse {
+  ok: boolean;
+  missions: Mission[];
+}
 
 export function HomePage() {
+  const [missions, setMissions] = useState<Mission[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currMissionDetails, setCurrMissionDetails] = useState<boolean>(false);
 
-  let currentMission = missionData.find(m => m.status === "current");
+  useEffect(() => {
+    const fetchMissions = async () => {
+      try {
+        const response: ApiResponse = await getMissions();
+        setMissions(response.missions);
+      } catch (error) {
+        console.error("Failed to fetch missions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const completedTasks = currentMission?.tasks.filter(t => t.completed).length || 0;
-  const totalTasks = currentMission?.tasks.length || 0;
+    fetchMissions();
+  }, []);
+
+  const currentMission = missions.length > 0 ? missions[0] : undefined;
+  const completedTasks = 0; // Mocked as per requirement
+  const totalTasks = currentMission?.nfts.length || 0;
   const currentProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
-  const allTasks = missionData.flatMap(m => m.tasks);
-  const totalCompletedTasks = allTasks.filter(t => t.completed).length;
-  const totalOverallTasks = allTasks.length;
+  const allNfts = missions.flatMap(m => m.nfts);
+  const totalCompletedTasks = 0; // Mocked as per requirement
+  const totalOverallTasks = allNfts.length;
   const totalProgress = totalOverallTasks > 0 ? (totalCompletedTasks / totalOverallTasks) * 100 : 0;
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="container mx-auto p-4 space-y-6">
       <h2 className="text-xl font-bold">Progresso Atual</h2>
       {currentMission && (
         <Card
-          key={currentMission.id}
+          key={currentMission.missionId}
           className={`border-0 transition-all animate-fade-in`}
           onClick={() => setCurrMissionDetails(!currMissionDetails)}
         >
@@ -99,6 +89,9 @@ export function HomePage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            <p className="text-sm text-foreground/80 leading-relaxed">
+              {currentMission.description}
+            </p>
             <div className="space-y-2">
             {currMissionDetails ? (
                 <div>
@@ -108,13 +101,13 @@ export function HomePage() {
                   </div>
                   <Progress value={currentProgress} className="h-3" />
                 </div>
-            ) : currentMission.tasks.map((task) => (
-                <div>
+            ) : currentMission.nfts.map((nft) => (
+                <div key={nft.PK}>
                   <div className="flex items-center justify-between text-sm">
-                    <span className={`font-medium ${task.completed && "line-through text-emerald-700"}`}>{task.description}</span>
-                    <span className={`font-bold ${task.completed && 'text-green-400'}`}>{task.completed ? 1 : 0}/1</span>
+                    <span className={`font-medium`}>{nft.title}</span>
+                    <span className={`font-bold`}>0/1</span>
                   </div>
-                  <Progress value={0} className={`h-3 ${task.completed && 'bg-green-400'}`} />
+                  <Progress value={0} className={`h-3`} />
                 </div>
               )
             )}
@@ -125,13 +118,13 @@ export function HomePage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {missionData.slice(1).map((mission, index) => {
-          const completed = mission.status === 'completed';
+        {missions.slice(1).map((mission, index) => {
+          const completed = false; // Mocked as per requirement
           const Icon = completed ? Check : Lock;
 
           return (
             <Card
-              key={mission.id}
+              key={mission.missionId}
               className={`${completed ? "bg-green-300" : "bg-gray-300"} border-0 transition-all animate-fade-in`}
               style={{ animationDelay: `${0.1 + index * 0.05}s` }}
             >

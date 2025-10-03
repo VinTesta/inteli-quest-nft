@@ -49,3 +49,11 @@ export const getClubs = async () => {
   }
   return response.json();
 };
+
+export const getMissions = async () => {
+  const response = await api("/missions/detailed");
+  if (!response.ok) {
+    throw new Error("Failed to fetch missions");
+  }
+  return response.json();
+}

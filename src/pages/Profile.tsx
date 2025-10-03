@@ -1,8 +1,10 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { getAccountData } from "@/lib/api";
 import { Target, Users, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 type Rarity = "comum" | "rara" | "épica" | "lendária";
 
@@ -53,6 +55,12 @@ const getRarityCount = (rarity: Rarity) => {
 export function Profile() {
   const [email, setEmail] = useState("");
   const [publicKey, setPublicKey] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("jwt");
+    navigate("/");
+  };
 
   useEffect(() => {
     const fetchAccountData = async () => {
@@ -86,6 +94,8 @@ export function Profile() {
           {publicKey ? `${publicKey.slice(0, 6)}...${publicKey.slice(-6)}` : ""}
         </p>
       </div>
+
+      <Button onClick={handleLogout} variant="destructive" className="w-full">Logout</Button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="glass-panel border-0">
