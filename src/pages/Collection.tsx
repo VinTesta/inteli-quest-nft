@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getNfts } from "@/lib/api";
+import { getAccountData, getNfts, getUserNfts } from "@/lib/api";
 
 type Rarity = "common" | "rare" | "epic" | "legendary";
 
@@ -20,7 +20,7 @@ interface Nft {
   symbol: string;
   createdAt: string;
   metadataUri: string;
-  collected: boolean;
+  completed: boolean;
 }
 
 const rarityColors: Record<Rarity, string> = {
@@ -37,12 +37,25 @@ export function Collection() {
   useEffect(() => {
     const fetchNfts = async () => {
       try {
-        let data = await getNfts();
-        data = data.map((nft: Nft) => ({
-          ...nft,
-          collected: true
-        }));
-        setNfts(data);
+        const accountData = await getAccountData();
+        const walletData = accountData.find((item) => item.SK === "WALLET");
+        const publicKey = walletData?.publicKey;
+
+        const allNfts = await getNfts();
+
+        if (publicKey) {
+          const userNftsResponse = await getUserNfts(publicKey);
+          const userNftIds = userNftsResponse.items.map((nft: { nftId: string }) => nft.nftId);
+
+          const updatedNfts = allNfts.map((nft: Nft) => ({
+            ...nft,
+            completed: userNftIds.includes(nft.GSI2SK.split("#")[1]),
+          }));
+
+          setNfts(updatedNfts);
+        } else {
+          setNfts(allNfts.map((nft: Nft) => ({ ...nft, completed: false })));
+        }
       } catch (error) {
         console.error("Failed to fetch nfts:", error);
       }
@@ -56,7 +69,7 @@ export function Collection() {
   };
 
   const getCollectedRarityCount = (rarity: Rarity) => {
-    return nfts.filter(n => n.rarity === rarity && n.collected).length;
+    return nfts.filter(n => n.rarity === rarity && n.completed).length;
   };
 
   return (
@@ -72,7 +85,7 @@ export function Collection() {
               <div className={`${color} rounded-lg p-2 mb-2 font-bold capitalize`}>
                 {rarity}
               </div>
-              <div className="text-2xl font-bold">
+              <div className="text-2d font-bold">
                 {getCollectedRarityCount(rarity as Rarity)}/{getRarityCount(rarity as Rarity)}
               </div>
             </div>
@@ -85,22 +98,24 @@ export function Collection() {
           return (
             <Card
               key={nft.PK}
-              className={`glass-panel border-0 transition-all ${nft.collected ? 'hover:scale-105' : 'opacity-60'}`}
-              onClick={() => nft.collected && navigate(`/nfts/${nft.PK}`)}
+              className={`glass-panel border-0 transition-all overflow-hidden ${nft.completed ? 'hover:scale-105' : 'opacity-60'}`}
+              onClick={() => nft.completed && navigate(`/nfts/${nft.PK.split("#")[1]}`)}
             >
-              <CardContent className="p-6 text-center space-y-3">
-                <div className={'bg-gray-200 p-4 rounded-xl mx-auto w-fit'}>
-                  {nft.collected ? (
-                    <img src={nft.imageUrl} alt={nft.title} className="h-8 w-8" />
+              <CardContent className="p-0">
+                <div className="aspect-square bg-gray-200 dark:bg-gray-800">
+                  {nft.completed ? (
+                    <img src={nft.imageUrl} alt={nft.title} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="h-8 w-8 flex items-center justify-center text-2xl">?</div>
+                    <div className="w-full h-full flex items-center justify-center text-4xl text-gray-500">?</div>
                   )}
                 </div>
-                <div>
-                  <p className="font-bold">{nft.collected ? nft.title : "???"}</p>
-                  <Badge className={`${rarityColors[nft.rarity]} mt-2`}>
-                    {nft.collected ? nft.rarity : "???"}
-                  </Badge>
+                <div className="p-4 text-center">
+                  <p className="font-bold truncate">{nft.completed ? nft.title : "???"}</p>
+                  {nft.completed && (
+                    <Badge className={`${rarityColors[nft.rarity]} mt-2`}>
+                      {nft.rarity}
+                    </Badge>
+                  )}
                 </div>
               </CardContent>
             </Card>

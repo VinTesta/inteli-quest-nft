@@ -1,15 +1,12 @@
-
 import { Card, CardContent } from "@/components/ui/card";
-import { Code } from "lucide-react";
+import { Check, Code } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getClubs } from "@/lib/api";
+import { getClubs, getAccountData, getUserNfts } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
 
-type Rarity = "comum" | "rara" | "épica" | "lendária";
-
 interface Club {
-  id: string;
+  clubId: string;
   name: string;
   description: string;
   imageUrl: string | null;
@@ -29,28 +26,40 @@ interface Club {
   };
 }
 
-const collectedNFTs: string[] = [];
-
 export function Clubs() {
   const [clubs, setClubs] = useState<Club[]>([]);
+  const [visitedClubs, setVisitedClubs] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchClubs = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
       try {
-        const data = await getClubs();
-        const validClubs = data.filter((club: Club) => club.name);
+        const [clubsData, accountData] = await Promise.all([
+          getClubs(),
+          getAccountData(),
+        ]);
+
+        const validClubs = clubsData.filter((club: Club) => club.name);
         setClubs(validClubs);
+
+        const walletData = accountData.find((item: any) => item.SK === "WALLET");
+        const publicKey = walletData?.publicKey;
+
+        if (publicKey) {
+          const userNfts = await getUserNfts(publicKey);
+          const visitedClubIds = new Set<string>(userNfts.items.map((nft: { clubId: string }) => nft.clubId));
+          setVisitedClubs(visitedClubIds);
+        }
       } catch (error) {
-        console.error("Failed to fetch clubs", error);
+        console.error("Failed to fetch data", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchClubs();
+    fetchData();
   }, []);
 
   return (
@@ -68,10 +77,10 @@ export function Clubs() {
             <Card key={index} className="glass-panel border-0">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <Skeleton className="h-16 w-16 rounded-xl" />
+                  <Skeleton className="h-16 w-16 rounded-xl bg-gray-500/20" />
                   <div className="flex-1 space-y-2">
-                    <Skeleton className="h-6 w-1/2" />
-                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-6 w-1/2 bg-gray-500/20" />
+                    <Skeleton className="h-4 w-3/4 bg-gray-500/20" />
                   </div>
                 </div>
               </CardContent>
@@ -79,32 +88,34 @@ export function Clubs() {
           ))
         ) : (
           clubs.map((club, index) => {
-            const isCollected = collectedNFTs.includes(club.id);
+            const isVisited = visitedClubs.has(club.clubId);
 
             return (
               <Card
-                key={club.id}
-                className="glass-panel border-0 animate-fade-in"
+                key={club.clubId}
+                className="glass-panel border-0 animate-fade-in transition-all hover:scale-[1.02] cursor-pointer"
                 style={{ animationDelay: `${index * 0.05}s` }}
-                onClick={() => navigate(`/clubs/${club.id}`)}
+                onClick={() => navigate(`/clubs/${club.clubId}`)}
               >
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <div className={`bg-purple-200 p-4 rounded-xl`}>
-                      <Code className={`h-8 w-8 text-purple-600`} />
+                    <div className={`bg-purple-200/10 p-3 rounded-xl flex-shrink-0`}>
+                      <img src={club.imageUrl || '/placeholder.svg'} alt={club.name} className="h-10 w-10 object-cover rounded-md" />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <h3 className="font-bold text-lg">{club.name}</h3>
-                          <p className="text-sm text-foreground/70">{club.description}</p>
+                          <p className="text-sm text-foreground/70 truncate">{club.description.slice(0, 23)}{club.description.length > 23 && "..."}</p>
                         </div>
                       </div>
                       <div className="flex flex-col gap-4 text-sm text-foreground/70 mt-3">
                         <div>
                           <div className="flex items-center justify-between text-sm">
-                            <span className={`font-medium ${isCollected && "line-through text-emerald-700"}`}>Visitado</span>
-                            <span className={`font-bold ${isCollected && 'text-green-400'}`}>{isCollected ? 1 : 0}/1</span>
+                             <span className={`font-medium ${isVisited ? "text-emerald-400" : "text-foreground/60"}`}>
+                              {isVisited ? "Visitado" : "Não Visitado"}
+                            </span>
+                            {isVisited && <Check className="h-5 w-5 text-emerald-400" />}
                           </div>
                         </div>
                       </div>

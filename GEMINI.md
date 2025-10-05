@@ -1,0 +1,3 @@
+Eu estou desenvolvendo um sistema de coleta de NFTs para desafiar os alunos que vão vir conhecer minha faculdade. A ideia é que eles passem nos stands dos clubes coletando NFTs e isso será baseado em missões de quais clubes ele deve coletar e afins. A história que vou contar é a seguinte: Eles são alunos do inteli e tem a missão de mudar o mundo com a tecnologia e devem passar nos clubes "recrutando" pessoas para isso. Faça um design usando branco de azul, painéis modernos e em glassmophism ou liquid glass e tudo voltado para uma ideia de fazer o mundo melhor com tecnologia.
+
+Siga sempre o design criado inicialmente

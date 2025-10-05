@@ -1,18 +1,21 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Target, Users, Trophy, Wallet, Sparkles, Check, Lock, Home } from "lucide-react";
+import { Target, Users, Trophy, Wallet, Sparkles, Check, Lock, Home, QrCode } from "lucide-react";
 import { HomePage } from "./Home";
 import { Collection } from "./Collection";
 import { Clubs } from "./Clubs";
 import { Profile } from "./Profile";
+import { Capture } from "./Capture";
 
 const Dashboard = () => {
   const [collectedNFTs, setCollectedNFTs] = useState<number[]>([]);
   const [activeTab, setActiveTab] = useState("missoes");
+  const navigate = useNavigate();
 
   const handleCollect = (clubId: number) => {
     if (!collectedNFTs.includes(clubId)) {
@@ -52,6 +55,10 @@ const Dashboard = () => {
             <Collection/>
           </TabsContent>
 
+          <TabsContent value="capture" className="mt-0 space-y-6">
+            <Capture/>
+          </TabsContent>
+
           {/* Clubes Tab */}
           <TabsContent value="clubes" className="mt-0 space-y-6">
             <Clubs/>
@@ -65,7 +72,7 @@ const Dashboard = () => {
 
         {/* Bottom Navigation */}
         <div className="fixed bottom-0 left-0 right-0 glass-strong border-t border-border/50">
-          <TabsList className="w-full h-16 bg-transparent grid grid-cols-4 rounded-none p-0">
+          <TabsList className="w-full h-16 bg-transparent grid grid-cols-5 rounded-none p-0">
             <TabsTrigger
               value="missoes"
               className="flex-col gap-1 h-full data-[state=active]:bg-primary/10 rounded-none"
@@ -80,6 +87,19 @@ const Dashboard = () => {
               <Sparkles className="h-5 w-5" />
               <span className="text-xs">NFTs</span>
             </TabsTrigger>
+
+            <TabsTrigger
+              value="capture"
+              className="flex-col gap-1 h-full data-[state=active]:bg-primary/10 rounded-none"
+            >
+              <div className="flex flex-col items-center justify-center -mt-8">
+                <div className="bg-primary rounded-full p-4 shadow-lg">
+                  <QrCode className="h-8 w-8 text-primary-foreground" />
+                </div>
+                <span className="text-xs mt-1">Capturar</span>
+              </div>
+            </TabsTrigger>
+
             <TabsTrigger
               value="clubes"
               className="flex-col gap-1 h-full data-[state=active]:bg-primary/10 rounded-none"
