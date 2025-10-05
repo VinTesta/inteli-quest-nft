@@ -1,6 +1,6 @@
 import { toast } from "@/components/ui/use-toast";
 
-const BASE_URL = "http://ec2-3-85-81-116.compute-1.amazonaws.com:3000";
+const BASE_URL = "https://inteli-day.inteliblockchain.org";
 
 export const api = async (url: string, options: RequestInit = {}) => {
   const token = localStorage.getItem("jwt");
