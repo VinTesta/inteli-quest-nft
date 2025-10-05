@@ -1,6 +1,38 @@
 {
   "rewrites": [
     {
+      "source": "/account",
+      "destination": "http://ec2-3-85-81-116.compute-1.amazonaws.com:3000/account"
+    },
+    {
+      "source": "/nft",
+      "destination": "http://ec2-3-85-81-116.compute-1.amazonaws.com:3000/nft"
+    },
+    {
+      "source": "/clubs",
+      "destination": "http://ec2-3-85-81-116.compute-1.amazonaws.com:3000/clubs"
+    },
+    {
+      "source": "/missions",
+      "destination": "http://ec2-3-85-81-116.compute-1.amazonaws.com:3000/missions"
+    },
+    {
+      "source": "/mint",
+      "destination": "http://ec2-3-85-81-116.compute-1.amazonaws.com:3000/mint"
+    },
+    {
+      "source": "/compressed",
+      "destination": "http://ec2-3-85-81-116.compute-1.amazonaws.com:3000/compressed"
+    },
+    {
+      "source": "/compression",
+      "destination": "http://ec2-3-85-81-116.compute-1.amazonaws.com:3000/compression"
+    },
+    {
+      "source": "/events",
+      "destination": "http://ec2-3-85-81-116.compute-1.amazonaws.com:3000/events"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
