@@ -41,7 +41,7 @@ export function Clubs() {
       setIsLoading(true);
       try {
         const data = await getClubs();
-        const validClubs = data.clubs.filter((club: Club) => club.name);
+        const validClubs = data.filter((club: Club) => club.name);
         setClubs(validClubs);
       } catch (error) {
         console.error("Failed to fetch clubs", error);

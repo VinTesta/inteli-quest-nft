@@ -52,6 +52,12 @@ const getRarityCount = (rarity: Rarity) => {
   }).length;
 };
 
+interface AccountDataItem {
+  SortKey: string;
+  email?: string;
+  publicKey?: string;
+}
+
 export function Profile() {
   const [email, setEmail] = useState("");
   const [publicKey, setPublicKey] = useState("");
@@ -65,15 +71,15 @@ export function Profile() {
   useEffect(() => {
     const fetchAccountData = async () => {
       try {
-        const data = await getAccountData();
-        const userData = data.find((item: any) => item.SortKey === "METADATA");
-        const walletData = data.find((item: any) => item.SortKey === "WALLET");
+        const data: AccountDataItem[] = await getAccountData();
+        const userData = data.find((item) => item.SortKey === "METADATA");
+        const walletData = data.find((item) => item.SortKey === "WALLET");
 
         if (userData) {
-          setEmail(userData.email);
+          setEmail(userData.email!);
         }
         if (walletData) {
-          setPublicKey(walletData.publicKey);
+          setPublicKey(walletData.publicKey!);
         }
       } catch (error) {
         console.error(error);

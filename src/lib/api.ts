@@ -47,13 +47,21 @@ export const getClubs = async () => {
   if (!response.ok) {
     throw new Error("Failed to fetch clubs");
   }
-  return response.json();
+  return (await response.json())["items"];
 };
 
 export const getMissions = async () => {
   const response = await api("/missions/detailed");
   if (!response.ok) {
     throw new Error("Failed to fetch missions");
+  }
+  return response.json();
+}
+
+export const getUserNfts = async (publicKey: string) => {
+  const response = await api(`/compressed/recipients/${publicKey}/mints`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch user nfts");
   }
   return response.json();
 }
