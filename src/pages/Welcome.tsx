@@ -14,7 +14,7 @@ const Welcome = () => {
       
       <div className="max-w-md w-full animate-fade-in flex">
         {/* Earth Animation */}
-        <div className="animate-float absolute opacity-80 -top-60 left-20 right-20 w-[500px] h-[500px]">
+        <div className="animate-float absolute opacity-80 -top-20 left-20 right-20 w-[900px] h-[900px]">
           <Earth />
         </div>
 
